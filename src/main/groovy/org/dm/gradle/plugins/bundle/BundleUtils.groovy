@@ -107,6 +107,10 @@ final class BundleUtils {
         paths.unique().collect { path -> new File(path as String) }
     }
 
+    static boolean getTrace(Jar jarTask) {
+        jarTask.project.bundle.trace
+    }
+
     static boolean getFailOnError(Jar jarTask) {
         jarTask.project.bundle.failOnError
     }

@@ -76,6 +76,11 @@ class JarBuilder implements AutoCloseable {
         this
     }
 
+    JarBuilder withTrace(trace) {
+        LOG.warn "Setting trace is deprecated since bnd supports tracing via slf4j, native in gradle"
+        this
+    }
+
     JarBuilder withFailOnError(failOnError) {
         LOG.debug "Setting fail on error {}", failOnError
         this.failOnError = failOnError

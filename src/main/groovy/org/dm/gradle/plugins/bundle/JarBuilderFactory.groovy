@@ -33,6 +33,7 @@ class JarBuilderFactory {
             withResources(getResources(jarTask)).
             withVersion(getVersion(project)).
             withName(getBundleSymbolicName(project)).
+            withTrace(getTrace(jarTask)).
             withFailOnError(getFailOnError(jarTask))
     }
 }
