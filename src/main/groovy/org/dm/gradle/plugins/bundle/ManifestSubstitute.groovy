@@ -9,16 +9,16 @@ import org.gradle.api.java.archives.internal.DefaultManifest
 import java.nio.charset.Charset
 
 import static aQute.bnd.osgi.Constants.BND_LASTMODIFIED
-import static org.dm.gradle.plugins.bundle.Objects.requireNonNull
+import static java.util.Objects.requireNonNull
 
 class ManifestSubstitute implements ManifestInternal {
     // With accordance to manifest specification
     private Charset charset = Charset.forName('UTF-8')
 
-    private final org.gradle.internal.Factory<JarBuilder> jarBuilderFactory
+    private final JarBuilderFactory jarBuilderFactory
     private final Manifest wrapped
 
-    ManifestSubstitute(org.gradle.internal.Factory<JarBuilder> jarBuilderFactory, Manifest wrapped) {
+    ManifestSubstitute(JarBuilderFactory jarBuilderFactory, Manifest wrapped) {
         this.jarBuilderFactory = requireNonNull(jarBuilderFactory)
         this.wrapped = wrapped ?: new DefaultManifest(null)
     }
@@ -37,7 +37,7 @@ class ManifestSubstitute implements ManifestInternal {
 
     @Override
     Manifest writeTo(OutputStream outputStream) {
-        jarBuilderFactory.create().writeManifestTo(outputStream) { manifest ->
+        jarBuilderFactory.get().writeManifestTo(outputStream) { manifest ->
             manifest.mainAttributes.remove(new java.util.jar.Attributes.Name(BND_LASTMODIFIED))
         }
         return this

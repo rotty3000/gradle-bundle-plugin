@@ -15,7 +15,7 @@ import static aQute.bnd.osgi.Constants.INCLUDE_RESOURCE
  * A jar generator, which is basically a wrapper
  * around bnd {@link Builder}.
  */
-class JarBuilder {
+class JarBuilder implements AutoCloseable {
     private final static Logger LOG = Logging.getLogger(JarBuilder.class)
 
     private String version
@@ -26,7 +26,13 @@ class JarBuilder {
     private def sourcepath
     private def properties
     private def failOnError
-    private def bndBuilder
+    private Builder bndBuilder
+
+    @Override
+    public void close() throws Exception {
+        bndBuilder?.close();
+        bndBuilder = null;
+    }
 
     JarBuilder withVersion(String version) {
         LOG.debug "Setting version {}", version

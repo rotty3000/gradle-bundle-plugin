@@ -3,16 +3,16 @@ package org.dm.gradle.plugins.bundle
 import org.gradle.api.Action
 import org.gradle.api.tasks.bundling.Jar
 
-import static org.dm.gradle.plugins.bundle.Objects.requireNonNull
+import static java.util.Objects.requireNonNull
 import static org.dm.gradle.plugins.bundle.BundleUtils.*
 
 /**
  * An action to be used for generating bundles.
  */
 class BundleGenerator implements Action<Jar> {
-    private final org.gradle.internal.Factory<JarBuilder> jarBuilderFactory
+    private final JarBuilderFactory jarBuilderFactory
 
-    BundleGenerator(org.gradle.internal.Factory<JarBuilder> jarBuilderFactory) {
+    BundleGenerator(JarBuilderFactory jarBuilderFactory) {
         this.jarBuilderFactory = requireNonNull(jarBuilderFactory)
     }
 
@@ -25,6 +25,12 @@ class BundleGenerator implements Action<Jar> {
      */
     @Override
     void execute(Jar jarTask) {
-        jarBuilderFactory.create().writeJarTo(getOutput(jarTask))
+        JarBuilder jarBuilder = jarBuilderFactory.get()
+        try {
+            jarBuilder.writeJarTo(getOutput(jarTask))
+        }
+        finally {
+            jarBuilder.close()
+        }
     }
 }

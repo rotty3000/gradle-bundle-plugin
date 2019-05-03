@@ -6,13 +6,13 @@ import spock.lang.Specification
 
 class ManifestSubstituteSpec extends Specification {
     Manifest manifest
-    org.gradle.internal.Factory<JarBuilder> factory
+    JarBuilderFactory factory
     ManifestSubstitute substitute
     JarBuilder jarBuilder
 
     def setup() {
         manifest = Mock(Manifest)
-        factory = Mock(org.gradle.internal.Factory)
+        factory = Mock(JarBuilderFactory)
         substitute = new ManifestSubstitute(factory, manifest)
         jarBuilder = Mock(JarBuilder)
     }
@@ -22,7 +22,7 @@ class ManifestSubstituteSpec extends Specification {
         substitute.writeTo(NullWriter.DEFAULT)
 
         then:
-        1 * factory.create() >> jarBuilder
+        1 * factory.get() >> jarBuilder
         1 * jarBuilder.writeManifestTo(*_)
         0 * manifest.writeTo(_)
     }

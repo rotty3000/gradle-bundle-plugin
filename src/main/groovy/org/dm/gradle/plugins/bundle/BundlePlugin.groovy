@@ -26,8 +26,7 @@ class BundlePlugin implements Plugin<Project> {
         }
         project.plugins.withType(JavaPlugin) {
             project.jar { jarTask ->
-                def jarBuilderFactory = new JarBuilderFactoryDecorator(
-                        jarTask, project.bundle.jarBuilderFactory)
+                def jarBuilderFactory = new JarBuilderFactory(jarTask)
 
                 setActions([])
                 doLast(new BundleGenerator(jarBuilderFactory))

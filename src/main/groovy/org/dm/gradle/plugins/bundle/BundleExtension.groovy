@@ -21,8 +21,6 @@ class BundleExtension {
 
     boolean includeTransitiveDependencies = false
 
-    org.gradle.internal.Factory<JarBuilder> jarBuilderFactory = DefaultJarBuilderFactory.INSTANCE
-
     def instruction(String name, String... values) {
         if (name == null || values == []) {
             return
