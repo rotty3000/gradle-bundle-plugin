@@ -73,7 +73,7 @@ class BundlePluginIntegrationSpec extends Specification {
 
     def "Jar task is executed while build"() {
         when:
-        executeGradleCommand 'clean build'
+        executeGradleCommand 'clean build --stacktrace'
 
         then:
         stdout =~ /(?m)^> Task :jar$/
@@ -82,7 +82,7 @@ class BundlePluginIntegrationSpec extends Specification {
     def "Uses project version as 'Bundle-Version' by default"() {
         when:
         buildScript.append '\nversion = "1.0.2"'
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
         jarName = "build/libs/${projectDir.name}-1.0.2.jar"
 
         then:
@@ -92,7 +92,7 @@ class BundlePluginIntegrationSpec extends Specification {
     def "Overwrites project version using 'Bundle-Version' instruction"() {
         when:
         buildScript.append '\nversion = "1.0.2"\nbundle { instructions << ["Bundle-Version": "5.0"] }'
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
         jarName = "build/libs/${projectDir.name}-1.0.2.jar"
 
         then:
@@ -101,7 +101,7 @@ class BundlePluginIntegrationSpec extends Specification {
 
     def "Uses bundle instructions"() {
         when:
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         manifestContains 'Bundle-Activator: org.foo.bar.TestActivator'
@@ -110,7 +110,7 @@ class BundlePluginIntegrationSpec extends Specification {
     def "Uses jar manifest values"() {
         when:
         buildScript.append '\njar { manifest { attributes("Built-By": "abc") } }'
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         manifestContains 'Built-By: abc'
@@ -119,7 +119,7 @@ class BundlePluginIntegrationSpec extends Specification {
     def "Overwrites jar manifest values"() {
         when:
         buildScript.append '\njar { manifest { attributes("Built-By": "abc") } }\nbundle { instructions << ["Built-By": "xyz"] }'
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         manifestContains 'Built-By: xyz'
@@ -128,7 +128,7 @@ class BundlePluginIntegrationSpec extends Specification {
     def "Uses baseName and extension defined in jar task"() {
         when:
         buildScript.append '\njar { baseName = "xyz"\nextension = "baz" }'
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         resolve(projectDir, 'build/libs/xyz.baz').exists()
@@ -137,7 +137,7 @@ class BundlePluginIntegrationSpec extends Specification {
     def "Ignores unknown attributes"() {
         when:
         buildScript.append '\nbundle { instructions << ["junk": "xyz"] }'
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         stdout =~ /(?m)^BUILD SUCCESSFUL/
@@ -145,7 +145,7 @@ class BundlePluginIntegrationSpec extends Specification {
 
     def "Includes project output class files by default"() {
         when:
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         jarContains 'org/foo/bar/TestActivator.class'
@@ -159,7 +159,7 @@ class BundlePluginIntegrationSpec extends Specification {
         resolve(resources, 'dummy.txt').write 'abc'
 
         when:
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         jarContains 'org/foo/bar/dummy.txt'
@@ -171,7 +171,7 @@ class BundlePluginIntegrationSpec extends Specification {
     def "Includes project sources if instructed"() {
         when:
         buildScript.append '\nbundle { instructions << ["-sources": true] }'
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         jarContains 'OSGI-OPT/src/org/foo/bar/TestActivator.java'
@@ -181,7 +181,7 @@ class BundlePluginIntegrationSpec extends Specification {
     def "Supports old OSGI plugin instruction format"() {
         when:
         buildScript.append '\nbundle { instruction "Built-By", "ab", "c"\ninstruction "Built-By", "x", "y", "z" }'
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         manifestContains 'Built-By: ab,c,x,y,z'
@@ -189,7 +189,7 @@ class BundlePluginIntegrationSpec extends Specification {
 
     def "Displays builder classpath"() {
         when:
-        executeGradleCommand 'clean jar -d'
+        executeGradleCommand 'clean jar --stacktrace -d'
 
         then:
         stdout =~ /The Builder is about to generate a jar using classpath: \[.+\]/
@@ -198,7 +198,7 @@ class BundlePluginIntegrationSpec extends Specification {
     def "Displays errors"() {
         when:
         buildScript.append '\nbundle { instructions << ["Bundle-Activator": "org.foo.bar.NotExistingActivator"] }'
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         stdout =~ /(?m)^BUILD SUCCESSFUL/
@@ -217,7 +217,7 @@ class BundlePluginIntegrationSpec extends Specification {
     @Issue(1)
     def "Saves manifest under build/tmp"() {
         when:
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         resolve(projectDir, 'build/tmp/jar/MANIFEST.MF').text == manifest.replaceAll('(?m)^Bnd-LastModified: \\d+$\r\n', '')
@@ -226,7 +226,7 @@ class BundlePluginIntegrationSpec extends Specification {
     @Issue(1)
     def "Does not re-execute 'jar' when manifest has not been changed"() {
         when:
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
         executeGradleCommand 'jar'
 
         then:
@@ -236,7 +236,7 @@ class BundlePluginIntegrationSpec extends Specification {
     @Issue(1)
     def "Re-executes 'jar' when manifest has been changed"() {
         when:
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
         buildScript.append '\nbundle { instructions << ["Built-By": "xyz"] }'
         executeGradleCommand 'jar'
 
@@ -253,7 +253,7 @@ class BundlePluginIntegrationSpec extends Specification {
         buildScript.append """
             dependencies { compile "org.springframework:spring-instrument:4.0.6.RELEASE" }
             bundle { instruction "-include", "${projectDirPath}/bnd.bnd" }"""
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         manifestContains 'Private-Package: org.springframework.instrument,org.foo.bar'
@@ -268,7 +268,7 @@ class BundlePluginIntegrationSpec extends Specification {
 
         when:
         buildScript.append "\nbundle { instruction 'Include-Resource', '${projectDirPath}/${resource}' }"
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         jarContains resource
@@ -283,7 +283,7 @@ class BundlePluginIntegrationSpec extends Specification {
 
         when:
         buildScript.append "\nbundle { instruction '-includeresource', '${projectDirPath}/${resource}' }"
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         jarContains resource
@@ -298,7 +298,7 @@ class BundlePluginIntegrationSpec extends Specification {
         buildScript.append """
             dependencies { compile 'org.osgi:org.osgi.compendium:5.0.0' }
             bundle { instructions << ["-dsannotations": "*"] }"""
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         manifestContains 'Service-Component: OSGI-INF/org.foo.bar.TestComponent.xml'
@@ -312,7 +312,7 @@ class BundlePluginIntegrationSpec extends Specification {
 
         when:
         buildScript.append '\nbundle { instructions << ["-include": "bnd.bnd"] }'
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         manifestContains 'Bundle-Description: Bundle Description Test'
@@ -328,7 +328,7 @@ class BundlePluginIntegrationSpec extends Specification {
         when:
         buildScript.append """
             bundle { instructions << ["-include": "bnd.bnd"] }"""
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         jarContains 'include.txt'
@@ -346,7 +346,7 @@ class BundlePluginIntegrationSpec extends Specification {
         buildScript.append """
             dependencies { compile 'org.apache.camel:camel-core:2.15.2' }
             bundle { instructions << ['-plugin': 'aQute.lib.spring.SpringXMLType'] }"""
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         manifest =~ /(?m)^Import-Package:.*org.apache.camel.*$/
@@ -358,7 +358,7 @@ class BundlePluginIntegrationSpec extends Specification {
         copyToProject('gradle.properties')
 
         when:
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         manifestContains 'Qux: baz'
@@ -371,7 +371,7 @@ class BundlePluginIntegrationSpec extends Specification {
 
         when:
         buildScript.append '\nbundle { passProjectProperties = false }'
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         !manifestContains('Qux: baz')
@@ -386,7 +386,7 @@ class BundlePluginIntegrationSpec extends Specification {
         buildScript.append """
             dependencies { compile 'com.google.guava:guava:18.0' }
             bundle { exclude module: 'guava' }"""
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         // com.google.common.hash is expected to have no version
@@ -397,7 +397,7 @@ class BundlePluginIntegrationSpec extends Specification {
     def "Produces an error when osgi plugin is applied"() {
         when:
         buildScript.append "apply plugin: 'osgi'"
-        executeGradleCommand 'clean jar', 1
+        executeGradleCommand 'clean jar --stacktrace', 1
 
         then:
         stderr.contains 'osgi'
@@ -408,7 +408,7 @@ class BundlePluginIntegrationSpec extends Specification {
         when:
         buildScript.append '\next {bar = \'bar\'}\ndef foo = "Foo"\n' +
                 'bundle { instructions << ["$foo": 123.5, \'Abc\': "$foo-${bar}"] }'
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         manifestContains 'Foo: 123.5'
@@ -420,7 +420,7 @@ class BundlePluginIntegrationSpec extends Specification {
         when:
         buildScript.append 'ext {bar = \'bar\'}\ndef foo = "Foo"\n' +
                 'jar { manifest { attributes "Xyz": "$foo-${bar}", \'Abc\': 123 } }'
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         manifestContains 'Xyz: Foo-bar'
@@ -434,7 +434,7 @@ class BundlePluginIntegrationSpec extends Specification {
 
         when:
         buildScript.append '\ndependencies { compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.6.4" }'
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         manifest =~ /(?m)^Import-Package: com.fasterxml.jackson.databind,org.osgi.framework.*$/
@@ -449,7 +449,7 @@ class BundlePluginIntegrationSpec extends Specification {
         buildScript.append '''
                 dependencies { compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.6.4" }
                 bundle { includeTransitiveDependencies = true }'''
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         manifest =~ /(?m)^Import-Package: com.fasterxml.jackson.databind;version=.*$/
@@ -459,7 +459,7 @@ class BundlePluginIntegrationSpec extends Specification {
     def "Handles bundle instructions with null values"() {
         when:
         buildScript.append 'bundle { instructions << ["Foo": null] }'
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         manifestContains 'Foo: null'
@@ -472,7 +472,7 @@ class BundlePluginIntegrationSpec extends Specification {
 
         when:
         buildScript.append 'dependencies { compileOnly "com.google.guava:guava:18.0" }'
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         manifest =~ /(?m)^Import-Package: com.google.common.hash;version=.*$/
@@ -487,7 +487,7 @@ class BundlePluginIntegrationSpec extends Specification {
         buildScript.append """
             dependencies { compileOnly 'com.google.guava:guava:18.0' }
             bundle { exclude module: 'guava' }"""
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         // com.google.common.hash is expected to have no version
@@ -498,7 +498,7 @@ class BundlePluginIntegrationSpec extends Specification {
     def "Produces an error when the build has errors"() {
         when:
         buildScript.append '\nbundle { failOnError = true\ninstruction "-plugin", "org.example.foo.Bar" }'
-        executeGradleCommand 'clean jar', 1
+        executeGradleCommand 'clean jar --stacktrace', 1
 
         then:
         stderr.contains 'FAILURE: Build failed with an exception.'
@@ -511,7 +511,7 @@ class BundlePluginIntegrationSpec extends Specification {
 
         when:
         buildScript.append '\njar { from "res" }'
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         jarContains 'nested/resource.txt'
@@ -526,7 +526,7 @@ class BundlePluginIntegrationSpec extends Specification {
         buildScript.append """
             |dependencies { runtime "org.springframework:spring-instrument:4.0.6.RELEASE" }
             |bundle { instruction "-include", "${projectDirPath}/bnd.bnd" }""".stripMargin()
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         manifestContains 'Private-Package:.*org.springframework.instrument,.*'
@@ -544,7 +544,7 @@ class BundlePluginIntegrationSpec extends Specification {
             |    instruction "-include", "${projectDirPath}/bnd.bnd"
             |    buildPathConfigurations 'compileOnly'
             |}""".stripMargin()
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         stdout.contains '[Unused Private-Package instructions, no such package(s) on the class path: [org.springframework.*]'
@@ -562,7 +562,7 @@ class BundlePluginIntegrationSpec extends Specification {
             |    instruction "-include", "${projectDirPath}/bnd.bnd"
             |    buildPathConfigurations 'compileOnly'
             |}""".stripMargin()
-        executeGradleCommand 'clean jar'
+        executeGradleCommand 'clean jar --stacktrace'
 
         then:
         1 == stdout.split('\n').findAll {it =~ /^\[Unused Private-Package instructions/ }.size
@@ -583,14 +583,14 @@ class BundlePluginIntegrationSpec extends Specification {
     }
 
     private def executeGradleCommand(cmd, expectedExitStatus = 0) {
-		def command = isWindows() ? "cmd /c gradlew.bat " : "./gradlew "
-		command += "${cmd} -b $projectDir/build.gradle"
-		
-		def out = new StringBuilder()
-		def err = new StringBuilder()
-		
+        def command = isWindows() ? "cmd /c gradlew.bat " : "./gradlew "
+        command += "${cmd} -b $projectDir/build.gradle"
+        
+        def out = new StringBuilder()
+        def err = new StringBuilder()
+        
         def process = command.execute()
-		process.waitForProcessOutput(out, err)
+        process.waitForProcessOutput(out, err)
 
         stdout = out.toString()
         stderr = err.toString()
@@ -600,10 +600,10 @@ class BundlePluginIntegrationSpec extends Specification {
 
         assert process.exitValue() == expectedExitStatus: '<' + process.exitValue() + '>'
     }
-	
-	private static def isWindows() {
-		System.getProperty("os.name").toLowerCase() ==~ /win.*/ 
-	}
+    
+    private static def isWindows() {
+        System.getProperty("os.name").toLowerCase() ==~ /win.*/ 
+    }
 
     private def manifestContains(String line) {
         manifest =~ "(?m)^$line\$"
